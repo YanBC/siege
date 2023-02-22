@@ -1,8 +1,8 @@
 /**
  * Siege, http regression tester / benchmark utility
  *
- * Copyright (C) 2000-2015 by  
- * Jeffrey Fulmer - <jeff@joedog.org>, et al. 
+ * Copyright (C) 2000-2015 by
+ * Jeffrey Fulmer - <jeff@joedog.org>, et al.
  * This file is distributed as part of Siege
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,7 +53,7 @@
 # include <getopt.h>
 #else
 # include <joedog/getopt.h>
-#endif 
+#endif
 
 /**
  * long options, std options struct
@@ -78,7 +78,7 @@ static struct option long_options[] =
   { "delay",        required_argument, NULL, 'd' },
   { "log",          optional_argument, NULL, 'l' },
   { "file",         required_argument, NULL, 'f' },
-  { "rc",           required_argument, NULL, 'R' }, 
+  { "rc",           required_argument, NULL, 'R' },
   { "mark",         required_argument, NULL, 'm' },
   { "header",       required_argument, NULL, 'H' },
   { "user-agent",   required_argument, NULL, 'A' },
@@ -88,21 +88,21 @@ static struct option long_options[] =
 };
 
 /**
- * display_version   
- * displays the version number and exits on boolean false. 
+ * display_version
+ * displays the version number and exits on boolean false.
  * continue running? TRUE=yes, FALSE=no
  * return void
  */
 
-void 
+void
 display_version(BOOLEAN b)
 {
   /**
-   * version_string is defined in version.c 
+   * version_string is defined in version.c
    * adding it to a separate file allows us
-   * to parse it in configure.  
+   * to parse it in configure.
    */
-  char name[128]; 
+  char name[128];
 
   xstrncpy(name, program_name, sizeof(name));
 
@@ -119,16 +119,16 @@ display_version(BOOLEAN b)
 }  /* end of display version */
 
 /**
- * display_help 
+ * display_help
  * displays the help section to STDOUT and exits
- */ 
-void 
+ */
+void
 display_help()
 {
   /**
-   * call display_version, but do not exit 
+   * call display_version, but do not exit
    */
-  display_version(FALSE); 
+  display_version(FALSE);
   printf("Usage: %s [options]\n", program_name);
   printf("       %s [options] URL\n", program_name);
   printf("       %s -g URL\n", program_name);
@@ -154,9 +154,9 @@ display_help()
   printf("                            default is used: PREFIX/var/%s.log\n", program_name);
   puts("  -m, --mark=\"text\"         MARK, mark the log file with a string." );
   puts("                            between .001 and NUM. (NOT COUNTED IN STATS)");
-  puts("  -H, --header=\"text\"       Add a header to request (can be many)" ); 
-  puts("  -A, --user-agent=\"text\"   Sets User-Agent in request" ); 
-  puts("  -T, --content-type=\"text\" Sets Content-Type in request" ); 
+  puts("  -H, --header=\"text\"       Add a header to request (can be many)" );
+  puts("  -A, --user-agent=\"text\"   Sets User-Agent in request" );
+  puts("  -T, --content-type=\"text\" Sets Content-Type in request" );
   puts("  -j, --json-output         JSON OUTPUT, print final stats to stdout as JSON");
   puts("      --no-parser           NO PARSER, turn off the HTML page parser");
   puts("      --no-follow           NO FOLLOW, do not follow HTTP redirects");
@@ -173,12 +173,12 @@ display_help()
  * the options are initialized from the .siegerc file before the command line
  * switches are parsed. The argument index is reset before leaving the
  * function. */
-void 
+void
 parse_rc_cmdline(int argc, char *argv[])
 {
   int a = 0;
   strcpy(my.rc, "");
-  
+
   while( a > -1 ){
     a = getopt_long(argc, argv, "VhvqCDNFpgl::ibr:t:f:d:c:m:H:R:A:T:j", long_options, (int*)0);
     if(a == 'R'){
@@ -187,14 +187,14 @@ parse_rc_cmdline(int argc, char *argv[])
     }
   }
   optind = 0;
-} 
+}
 
 /**
  * parses command line arguments and assigns
  * values to run time variables. relies on GNU
- * getopts included with this distribution.  
- */ 
-void 
+ * getopts included with this distribution.
+ */
+void
 parse_cmdline(int argc, char *argv[])
 {
   int c = 0;
@@ -227,7 +227,7 @@ parse_cmdline(int argc, char *argv[])
 	/* XXX range checking? use strtol? */
         my.delay   = atof(optarg);
 	if(my.delay < 0){
-	  my.delay = 0; 
+	  my.delay = 0;
 	}
         break;
       case 'g':
@@ -246,12 +246,12 @@ parse_cmdline(int argc, char *argv[])
             exit(1);
           }
           xstrncpy(my.logfile, optarg, strlen(optarg)+1);
-        } 
+        }
         break;
       case 'm':
         my.mark    = TRUE;
         my.markstr = optarg;
-        my.logging = TRUE; 
+        my.logging = TRUE;
         break;
       case 'q':
         my.quiet   = TRUE;
@@ -285,11 +285,11 @@ parse_cmdline(int argc, char *argv[])
       case 'F':
         my.follow = FALSE;
         break;
-      case 'R':  
+      case 'R':
         /**
-         * processed above 
+         * processed above
          */
-        break; 
+        break;
       case 'H':
         {
           if(!strchr(optarg,':')) NOTIFY(FATAL, "no ':' in http-header");
@@ -307,7 +307,7 @@ parse_cmdline(int argc, char *argv[])
   }   /* end of while c = getopt_long */
   nargs = argc - optind;
   if (nargs)
-    my.url = xstrdup(argv[argc-1]); 
+    my.url = xstrdup(argv[argc-1]);
   if (my.get && my.url==NULL) {
     puts("ERROR: -g/--get requires a commandline URL");
     exit(1);
@@ -332,23 +332,23 @@ __signal_setup()
 private void
 __config_setup(int argc, char *argv[])
 {
-  
+
   memset(&my, '\0', sizeof(struct CONFIG));
 
-  parse_rc_cmdline(argc, argv); 
-  if (init_config() < 0) { 
-    exit(EXIT_FAILURE); 
-  } 
+  parse_rc_cmdline(argc, argv);
+  if (init_config() < 0) {
+    exit(EXIT_FAILURE);
+  }
   parse_cmdline(argc, argv);
-  ds_module_check(); 
-  
+  ds_module_check();
+
   if (my.config) {
-    show_config(TRUE);    
+    show_config(TRUE);
   }
 
-  /** 
+  /**
    * Let's tap the brakes and make sure the user knows what they're doing...
-   */ 
+   */
   if (my.cusers > my.limit) {
     printf("\n");
     printf("================================================================\n");
@@ -362,7 +362,7 @@ __config_setup(int argc, char *argv[])
 }
 
 private LINES *
-__urls_setup() 
+__urls_setup()
 {
   LINES * lines;
 
@@ -371,19 +371,19 @@ __urls_setup()
   lines->line    = NULL;
 
   if (my.url != NULL) {
-    my.length = 1; 
-  } else { 
-    my.length = read_cfg_file(lines, my.file); 
+    my.length = 1;
+  } else {
+    my.length = read_cfg_file(lines, my.file);
   }
 
-  if (my.length == 0) { 
+  if (my.length == 0) {
     display_help();
   }
 
   return lines;
 }
 
-int 
+int
 main(int argc, char *argv[])
 {
   int       i, j;
@@ -395,10 +395,10 @@ main(int argc, char *argv[])
   HASH      cookies  = NULL;
   ARRAY     urls     = new_array();
   ARRAY     browsers = new_array();
-  pthread_t cease; 
-  pthread_t timer;  
+  pthread_t cease;
+  pthread_t timer;
   pthread_attr_t scope_attr;
- 
+
   __signal_setup();
   __config_setup(argc, argv);
   lines = __urls_setup();
@@ -407,8 +407,8 @@ main(int argc, char *argv[])
   pthread_attr_setscope(&scope_attr, PTHREAD_SCOPE_SYSTEM);
 #if defined(_AIX)
   /**
-   * AIX, for whatever reason, defies the pthreads standard and  
-   * creates threads detached by default. (see pthread.h on AIX) 
+   * AIX, for whatever reason, defies the pthreads standard and
+   * creates threads detached by default. (see pthread.h on AIX)
    */
   pthread_attr_setdetachstate(&scope_attr, PTHREAD_CREATE_JOINABLE);
 #endif
@@ -421,16 +421,16 @@ main(int argc, char *argv[])
     URL tmp = new_url(my.url);
     url_set_ID(tmp, 0);
     if (my.get && url_get_method(tmp) != POST && url_get_method(tmp) != PUT) {
-      url_set_method(tmp, my.method); 
+      url_set_method(tmp, my.method);
     }
     array_npush(urls, tmp, URLSIZE); // from cmd line
-  } else { 
+  } else {
     for (i = 0; i < my.length; i++) {
       URL tmp = new_url(lines->line[i]);
       url_set_ID(tmp, i);
       array_npush(urls, tmp, URLSIZE);
     }
-  } 
+  }
 
   cookies = load_cookies(my.cookies);
   for (i = 0; i < my.cusers; i++) {
@@ -441,13 +441,13 @@ main(int argc, char *argv[])
     if (cookies != NULL) {
       if (hash_get(cookies, tmp) != NULL) {
         browser_set_cookies(B, (HASH)hash_get(cookies, tmp));
-      } 
+      }
     }
     if (my.reps > 0 ) {
       browser_set_urls(B, urls);
     } else {
       /**
-       * Scenario: -r once/--reps=once 
+       * Scenario: -r once/--reps=once
        */
       int n_urls = array_length(urls);
       int per_user = n_urls / my.cusers;
@@ -467,8 +467,8 @@ main(int argc, char *argv[])
   }
 
   if ((crew = new_crew(my.cusers, my.cusers, FALSE)) == NULL) {
-    NOTIFY(FATAL, "unable to allocate memory for %d simulated browser", my.cusers);  
-  } 
+    NOTIFY(FATAL, "unable to allocate memory for %d simulated browser", my.cusers);
+  }
 
   if ((result = pthread_create(&cease, NULL, (void*)sig_handler, (void*)crew)) < 0) {
     NOTIFY(FATAL, "failed to create handler: %d\n", result);
@@ -476,7 +476,7 @@ main(int argc, char *argv[])
   if (my.secs > 0) {
     if ((result = pthread_create(&timer, NULL, (void*)siege_timer, (void*)cease)) < 0) {
       NOTIFY(FATAL, "failed to create handler: %d\n", result);
-    } 
+    }
   }
 
   /**
@@ -484,34 +484,34 @@ main(int argc, char *argv[])
    * and prepare for verbose output if necessary.
    */
   if (!my.get && !my.quiet) {
-    fprintf(stderr, "** "); 
+    fprintf(stderr, "** ");
     display_version(FALSE);
     fprintf(stderr, "** Preparing %d concurrent users for battle.\n", my.cusers);
     fprintf(stderr, "The server is now under siege...");
     if (my.verbose) { fprintf(stderr, "\n"); }
-  } 
+  }
 
   data = new_data();
   data_set_start(data);
   for (i = 0; i < my.cusers && crew_get_shutdown(crew) != TRUE; i++) {
     BROWSER B = (BROWSER)array_get(browsers, i);
     result = crew_add(crew, (void*)start, B);
-    if (result == FALSE) { 
+    if (result == FALSE) {
       my.verbose = FALSE;
       fprintf(stderr, "Unable to spawn additional threads; you may need to\n");
-      fprintf(stderr, "upgrade your libraries or tune your system in order\n"); 
+      fprintf(stderr, "upgrade your libraries or tune your system in order\n");
       fprintf(stderr, "to exceed %d users.\n", my.cusers);
-      NOTIFY(FATAL, "system resources exhausted"); 
+      NOTIFY(FATAL, "system resources exhausted");
     }
-  } 
+  }
   crew_join(crew, TRUE, &status);
-  data_set_stop(data); 
+  data_set_stop(data);
 
 #ifdef HAVE_SSL
   SSL_thread_cleanup();
 #endif
 
-  for (i = 0; i < ((crew_get_total(crew) > my.cusers || 
+  for (i = 0; i < ((crew_get_total(crew) > my.cusers ||
                     crew_get_total(crew) == 0) ? my.cusers : crew_get_total(crew)); i++) {
     BROWSER B = (BROWSER)array_get(browsers, i);
     data_increment_count(data, browser_get_hits(B));
@@ -538,8 +538,8 @@ main(int argc, char *argv[])
     );
     fprintf(stderr, "Elapsed time:\t\t%12.2f secs\n",        data_get_elapsed(data));
     fprintf(stderr, "Data transferred:\t%12.2f MB\n",        data_get_megabytes(data)); /*%12llu*/
-    fprintf(stderr, "Response time:\t\t%12.2f ms\n",       1000.0f * data_get_response_time(data));
-    fprintf(stderr, "Transaction rate:\t%12.2f trans/sec\n", data_get_transaction_rate(data));
+    fprintf(stderr, "Response time:\t\t%12.4f ms\n",       1000.0f * data_get_response_time(data));
+    fprintf(stderr, "Transaction rate:\t%12.4f trans/sec\n", data_get_transaction_rate(data));
     fprintf(stderr, "Throughput:\t\t%12.2f MB/sec\n",        data_get_throughput(data));
     fprintf(stderr, "Concurrency:\t\t%12.2f\n",              data_get_concurrency(data));
     fprintf(stderr, "Successful transactions:%9u\n",        data_get_code(data));
@@ -567,8 +567,8 @@ main(int argc, char *argv[])
     printf("\t\"availability\":\t\t\t%12.2f,\n", availability);
     printf("\t\"elapsed_time\":\t\t\t%12.2f,\n", data_get_elapsed(data));
     printf("\t\"data_transferred\":\t\t%12.2f,\n", data_get_megabytes(data)); /*%12llu*/
-    printf("\t\"response_time\":\t\t%12.2f,\n", data_get_response_time(data));
-    printf("\t\"transaction_rate\":\t\t%12.2f,\n", data_get_transaction_rate(data));
+    printf("\t\"response_time\":\t\t%12.4f,\n", 1000.0f * data_get_response_time(data));
+    printf("\t\"transaction_rate\":\t\t%12.4f,\n", data_get_transaction_rate(data));
     printf("\t\"throughput\":\t\t\t%12.2f,\n", data_get_throughput(data));
     printf("\t\"concurrency\":\t\t\t%12.2f,\n", data_get_concurrency(data));
     printf("\t\"successful_transactions\":\t%12u,\n", data_get_code(data));
@@ -610,5 +610,5 @@ main(int argc, char *argv[])
     xfree(lines);
   }
 
-  exit(EXIT_SUCCESS);  
+  exit(EXIT_SUCCESS);
 } /* end of int main **/
