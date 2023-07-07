@@ -112,7 +112,7 @@ private BOOLEAN __no_follow(const char *hostname);
 private void    __increment_failures();
 private int     __select_color(int code);
 private void    __display_result(BROWSER this, RESPONSE resp, URL U, unsigned long bytes, float etime);
-
+private void    __init_cookies(BROWSER this);
 
 #ifdef  SIGNAL_CLIENT_PLATFORM
 private void    __signal_handler(int sig);
@@ -250,6 +250,8 @@ start(BROWSER this)
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &this->state);
 #endif/*SIGNAL_CLIENT_PLATFORM*/
 
+  __init_cookies(this);
+
   if (my.login == TRUE) {
     URL tmp = new_url(array_next(my.lurl));
     url_set_ID(tmp, 0);
@@ -376,10 +378,12 @@ browser_set_urls(BROWSER this, ARRAY urls)
 void
 browser_set_cookies(BROWSER this, HASH cookies)
 {
-  int i = 0;
-
   this->cookies = cookies;
+}
 
+private void
+__init_cookies(BROWSER this) {
+  int i;
   if (this->cookies != NULL) {
     char **keys = hash_get_keys(this->cookies);
     for (i = 0; i < hash_get_entries(this->cookies); i ++){
@@ -420,6 +424,8 @@ __request(BROWSER this, URL U) {
 private BOOLEAN
 __http(BROWSER this, URL U)
 {
+  char     *url;
+  BOOLEAN  res;
   unsigned long bytes  = 0;
   int      code, okay, fail;
   float    etime;
@@ -678,10 +684,12 @@ __http(BROWSER this, URL U)
           b = auth_set_ntlm_header (
             my.auth, HTTP, response_get_www_auth_challenge(resp), response_get_www_auth_realm(resp)
           );
+          if (b == FALSE) return b;
         }
         if (response_get_www_auth_type(resp) == BASIC) {
           this->auth.type.www =  BASIC;
-          auth_set_basic_header(my.auth, HTTP, response_get_www_auth_realm(resp));
+          b = auth_set_basic_header(my.auth, HTTP, response_get_www_auth_realm(resp));
+          if (b == FALSE) return b;
         }
         if ((__request(this, U)) == FALSE) {
           fprintf(stderr, "ERROR from http_request\n");
@@ -689,14 +697,30 @@ __http(BROWSER this, URL U)
         }
       }
       break;
+    case 403:
+      res = FALSE;
+      while ((url = array_pop(my.aurl)) != NULL) {
+        URL tmp = new_url(url);
+        if (strmatch(url_get_hostname(U), url_get_hostname(tmp))) {
+          url_set_ID(tmp, 0);
+          res = __request(this, tmp);
+          if (res == TRUE) {
+            xfree(url);
+            res = __request(this, U);
+            return res;
+          }
+        }
+        xfree(url);
+      }
+      return res;
     case 407:
       /**
        * Proxy-Authenticate challenge from the proxy server.
        */
       this->auth.proxy = (this->auth.proxy==0) ? 1 : this->auth.proxy;
       if ((this->auth.bids.proxy++) < my.bids - 1) {
+        BOOLEAN b;
         if (response_get_proxy_auth_type(resp) == DIGEST) {
-          BOOLEAN b;
           this->auth.type.proxy =  DIGEST;
           b = auth_set_digest_header (
             my.auth, &(this->auth.pchlg), &(this->auth.pcred), &(this->rseed),
@@ -712,7 +736,8 @@ __http(BROWSER this, URL U)
         }
         if (response_get_proxy_auth_type(resp) == BASIC) {
           this->auth.type.proxy = BASIC;
-          auth_set_basic_header(my.auth, PROXY, response_get_proxy_auth_realm(resp));
+          b = auth_set_basic_header(my.auth, PROXY, response_get_proxy_auth_realm(resp));
+          if (b == FALSE) return b;
         }
         if ((__request(this, U)) == FALSE)
           return FALSE;
